@@ -1,0 +1,13 @@
+[
+  {
+    "source": "Slack",
+    "channel": "dev-ops-help",
+    "user": "Senior_Sarah",
+    "text": "The production server is throwing 504s again. It's the Redis cache. Don't just restart it, you have to clear the orphan tokens first or the DB will lock up. Use command 'redis-cli flushall' then restart the pod."
+  },
+  {
+    "source": "Jira",
+    "ticket_id": "PAY-992",
+    "comments": "Fixed the API timeout by switching to the v2 endpoint. v1 has a hardcoded rate limit of 100/min that we can't change."
+  }
+]
