@@ -22,3 +22,8 @@ OmniKnow uses a **Multi-Agent System (LangGraph + CrewAI)** to:
 - **Succession Risk Dashboard:** Real-time visualization of knowledge vulnerability.
 - **AI-Led Handoffs:** Automated interview loops to capture tacit knowledge.
 - **Semantic Ghost Memory:** Search the "collective brain" of former employees.
+
+
+
+https://github.com/user-attachments/assets/55ea00c4-1a96-4d57-bdcc-18cf47825328
+
