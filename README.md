@@ -23,7 +23,8 @@ OmniKnow uses a **Multi-Agent System (LangGraph + CrewAI)** to:
 - **AI-Led Handoffs:** Automated interview loops to capture tacit knowledge.
 - **Semantic Ghost Memory:** Search the "collective brain" of former employees.
 
+## Demo Video
+https://github.com/user-attachments/assets/dbb5cb1c-9b09-4247-95ce-0c5f1b999b28
 
 
-https://github.com/user-attachments/assets/55ea00c4-1a96-4d57-bdcc-18cf47825328
 
