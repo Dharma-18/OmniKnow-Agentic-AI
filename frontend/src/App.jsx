@@ -1,6 +1,62 @@
 import React, { useState, useEffect } from 'react';
 
 const KnowledgeRetentionDemo = () => {
+    const [isAuditing, setIsAuditing] = useState(false);
+    const [auditStep, setAuditStep] = useState(0); // 0: Idle, 1: Detecting, 2: Capturing, 3: Retrieving
+    const [auditData, setAuditData] = useState(null);
+
+    const runLiveAudit = async () => {
+        setIsAuditing(true);
+        setAuditStep(1);
+
+        try {
+            // Step 1: Detect (Call Backend)
+            const response = await fetch('http://localhost:8000/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: "Critical: Sarah Miller fixed 504 Gateway Timeout in Payment-Prod by flushing Redis keys." }),
+            });
+
+            if (!response.ok) throw new Error("Backend offline");
+
+            const result = await response.json();
+
+            // Artificial delays for "Agentic" feel
+            setTimeout(() => {
+                setAuditStep(2);
+                setAuditData(result);
+
+                setTimeout(() => {
+                    setAuditStep(3);
+                    setTimeout(() => {
+                        setIsAuditing(false);
+                    }, 2000);
+                }, 3000);
+            }, 2000);
+
+        } catch (error) {
+            console.warn("Backend not found, using high-fidelity demo fallback.");
+
+            const mockResult = {
+                summary: "Sarah Miller resolved the 'Payment-Prod' 504 error by flushing Redis keys before restarting the service.",
+                employee_risk_level: 92,
+                is_critical: true
+            };
+
+            setTimeout(() => {
+                setAuditStep(2);
+                setAuditData(mockResult);
+
+                setTimeout(() => {
+                    setAuditStep(3);
+                    setTimeout(() => {
+                        setIsAuditing(false);
+                    }, 2000);
+                }, 3000);
+            }, 2000);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans">
             {/* Header Section */}
@@ -12,6 +68,13 @@ const KnowledgeRetentionDemo = () => {
                 <p className="text-zinc-500 text-sm max-w-2xl mx-auto leading-relaxed">
                     Three pillars of enterprise knowledge continuity powered by agentic AI
                 </p>
+                <button
+                    onClick={runLiveAudit}
+                    disabled={isAuditing}
+                    className={`mt-6 px-8 py-3 rounded-full font-bold transition-all ${isAuditing ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700' : 'bg-amber-500 text-zinc-950 hover:bg-amber-400 active:scale-95 shadow-lg shadow-amber-500/20'}`}
+                >
+                    {isAuditing ? 'Audit Cycle in Progress...' : '🚀 Start Live Demo Audit'}
+                </button>
             </div>
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-8 py-16">
@@ -19,7 +82,7 @@ const KnowledgeRetentionDemo = () => {
 
                     {/* Visual A: Vulnerability Dashboard */}
                     <div className="flex flex-col">
-                        <div className="relative bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800 shadow-2xl">
+                        <div className={`relative bg-zinc-900 rounded-lg overflow-hidden border transition-all duration-500 shadow-2xl ${auditStep === 1 ? 'border-amber-500 ring-1 ring-amber-500/50 scale-[1.02]' : 'border-zinc-800'}`}>
                             {/* Laptop Frame Header */}
                             <div className="bg-zinc-800/80 px-4 py-2 flex items-center gap-2 border-b border-zinc-700/50">
                                 <div className="flex gap-1.5">
@@ -52,7 +115,7 @@ const KnowledgeRetentionDemo = () => {
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-zinc-400 text-xs uppercase tracking-wider mb-1">Succession Risk Score</p>
-                                            <p className="text-white text-2xl font-bold" style={{ fontFamily: 'Georgia, serif' }}>78%</p>
+                                            <p className="text-white text-2xl font-bold" style={{ fontFamily: 'Georgia, serif' }}>{auditData ? auditData.employee_risk_level : 78}%</p>
                                             <p className="text-red-400 text-xs mt-1">HIGH RISK</p>
                                         </div>
                                         {/* Circular Gauge */}
@@ -70,12 +133,12 @@ const KnowledgeRetentionDemo = () => {
                                                     fill="none"
                                                     stroke="#ef4444"
                                                     strokeWidth="3"
-                                                    strokeDasharray="78, 100"
+                                                    strokeDasharray={`${auditData ? auditData.employee_risk_level : 78}, 100`}
                                                     strokeLinecap="round"
                                                 />
                                             </svg>
                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                <span className="text-white text-sm font-bold">78</span>
+                                                <span className="text-white text-sm font-bold">{auditData ? auditData.employee_risk_level : 78}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -126,7 +189,7 @@ const KnowledgeRetentionDemo = () => {
 
                     {/* Visual B: AI Memory Agent - Central Highlight */}
                     <div className="flex flex-col">
-                        <div className="relative bg-zinc-900 overflow-hidden border border-zinc-800 shadow-2xl rounded-lg">
+                        <div className={`relative bg-zinc-900 overflow-hidden border transition-all duration-500 shadow-2xl rounded-lg ${auditStep === 2 ? 'border-amber-500 ring-1 ring-amber-500/50 scale-[1.02]' : 'border-zinc-800'}`}>
                             {/* Chat Window Header */}
                             <div className="bg-zinc-800/80 px-4 py-3 flex items-center gap-3 border-b border-zinc-700/50">
                                 <div className="flex gap-1.5">
@@ -138,86 +201,89 @@ const KnowledgeRetentionDemo = () => {
                                     <div className="w-6 h-6 bg-gradient-to-br from-amber-400 to-orange-500 rounded-md flex items-center justify-center">
                                         <span className="text-zinc-950 text-xs font-bold">M</span>
                                     </div>
-                                    <span className="text-white text-xs font-medium">#memory-agent AI Agent</span>
+                                    <span className="text-white text-xs font-medium">Memory AI Agent</span>
                                 </div>
                             </div>
-
                             {/* Chat Content */}
                             <div className="p-4 space-y-4 min-h-[320px]">
-                                {/* Bot Message 1 */}
-                                <div className="flex gap-3">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-md flex items-center justify-center">
-                                        <span className="text-zinc-950 text-xs font-bold">M</span>
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-baseline gap-2 mb-1">
-                                            <span className="text-amber-400 text-xs font-medium">Memory Agent</span>
-                                            <span className="text-zinc-600 text-[10px]">2:34 PM</span>
+                                {auditStep >= 2 && (
+                                    <>
+                                        {/* Bot Message 1 */}
+                                        <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                            <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-md flex items-center justify-center">
+                                                <span className="text-zinc-950 text-xs font-bold">M</span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-baseline gap-2 mb-1">
+                                                    <span className="text-amber-400 text-xs font-medium">Memory Agent</span>
+                                                    <span className="text-zinc-600 text-[10px]">2:34 PM</span>
+                                                </div>
+                                                <div className="bg-zinc-800/60 rounded-lg rounded-tl-none p-3 text-zinc-300 text-xs leading-relaxed border border-zinc-700/30">
+                                                    Hi Sarah! 👋 I noticed you solved a <span className="text-white font-medium">504 Gateway Timeout</span> in the <span className="text-white font-medium">'Payment-Prod'</span> server yesterday. Could you explain the fix for our records?
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="bg-zinc-800/60 rounded-lg rounded-tl-none p-3 text-zinc-300 text-xs leading-relaxed border border-zinc-700/30">
-                                            Hi Sarah! 👋 I noticed you solved a <span className="text-white font-medium">504 Gateway Timeout</span> in the <span className="text-white font-medium">'Payment-Prod'</span> server yesterday. Could you explain the fix for our records?
-                                        </div>
-                                    </div>
-                                </div>
 
-                                {/* User Message */}
-                                <div className="flex gap-3 justify-end">
-                                    <div className="flex-1 flex flex-col items-end">
-                                        <div className="flex items-baseline gap-2 mb-1">
-                                            <span className="text-zinc-600 text-[10px]">2:36 PM</span>
-                                            <span className="text-zinc-400 text-xs font-medium">Sarah Miller</span>
+                                        {/* User Message */}
+                                        <div className="flex gap-3 justify-end animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
+                                            <div className="flex-1 flex flex-col items-end">
+                                                <div className="flex items-baseline gap-2 mb-1">
+                                                    <span className="text-zinc-600 text-[10px]">2:36 PM</span>
+                                                    <span className="text-zinc-400 text-xs font-medium">Sarah Miller</span>
+                                                </div>
+                                                <div className="bg-amber-500/10 rounded-lg rounded-tr-none p-3 text-zinc-200 text-xs leading-relaxed border border-amber-500/20 max-w-[90%]">
+                                                    Sure! It was a Redis cache lockup. I had to flush the keys before restarting the pod. The command was <span className="text-white font-mono bg-zinc-700/50 px-1 py-0.5 rounded">FLUSHALL</span> then deploy.
+                                                </div>
+                                            </div>
+                                            <div className="flex-shrink-0 w-8 h-8 bg-zinc-700 rounded-md flex items-center justify-center">
+                                                <span className="text-zinc-300 text-xs font-medium">SM</span>
+                                            </div>
                                         </div>
-                                        <div className="bg-amber-500/10 rounded-lg rounded-tr-none p-3 text-zinc-200 text-xs leading-relaxed border border-amber-500/20 max-w-[90%]">
-                                            Sure! It was a Redis cache lockup. I had to flush the keys before restarting the pod. The command was <span className="text-white font-mono bg-zinc-700/50 px-1 py-0.5 rounded">FLUSHALL</span> then deploy.
-                                        </div>
-                                    </div>
-                                    <div className="flex-shrink-0 w-8 h-8 bg-zinc-700 rounded-md flex items-center justify-center">
-                                        <span className="text-zinc-300 text-xs font-medium">SM</span>
-                                    </div>
-                                </div>
+                                    </>
+                                )}
 
-                                {/* Bot Message 2 */}
-                                <div className="flex gap-3">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-md flex items-center justify-center">
-                                        <span className="text-zinc-950 text-xs font-bold">M</span>
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-baseline gap-2 mb-1">
-                                            <span className="text-amber-400 text-xs font-medium">Memory Agent</span>
-                                            <span className="text-zinc-600 text-[10px]">2:36 PM</span>
-                                            <span className="text-emerald-400 text-[10px]">✓</span>
+                                {auditStep === 3 && (
+                                    /* Bot Message 2 */
+                                    <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-md flex items-center justify-center">
+                                            <span className="text-zinc-950 text-xs font-bold">M</span>
                                         </div>
-                                        <div className="bg-zinc-800/60 rounded-lg rounded-tl-none p-3 text-zinc-300 text-xs leading-relaxed border border-zinc-700/30">
-                                            Got it! 🎯 I've added a <span className="text-white font-medium">"Troubleshooting Guide: Payment-Prod 504"</span> to the Knowledge Graveyard with:
-                                            <ul className="mt-2 space-y-1 text-zinc-400">
-                                                <li className="flex items-center gap-2">
-                                                    <span className="text-amber-400">→</span>
-                                                    Redis flush command reference
-                                                </li>
-                                                <li className="flex items-center gap-2">
-                                                    <span className="text-amber-400">→</span>
-                                                    Link to Slack thread
-                                                </li>
-                                                <li className="flex items-center gap-2">
-                                                    <span className="text-amber-400">→</span>
-                                                    Associated Jira ticket
-                                                </li>
-                                            </ul>
+                                        <div className="flex-1">
+                                            <div className="flex items-baseline gap-2 mb-1">
+                                                <span className="text-amber-400 text-xs font-medium">Memory Agent</span>
+                                                <span className="text-zinc-600 text-[10px]">2:36 PM</span>
+                                                <span className="text-emerald-400 text-[10px]">✓</span>
+                                            </div>
+                                            <div className="bg-zinc-800/60 rounded-lg rounded-tl-none p-3 text-zinc-300 text-xs leading-relaxed border border-zinc-700/30">
+                                                Got it! 🎯 I've added a <span className="text-white font-medium">"Troubleshooting Guide: Payment-Prod 504"</span> to the Knowledge Graveyard with:
+                                                <ul className="mt-2 space-y-1 text-zinc-400">
+                                                    <li className="flex items-center gap-2">
+                                                        <span className="text-amber-400">→</span>
+                                                        Redis flush command reference
+                                                    </li>
+                                                    <li className="flex items-center gap-2">
+                                                        <span className="text-amber-400">→</span>
+                                                        Link to Slack thread
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
-                                {/* Typing Indicator */}
-                                <div className="flex gap-3 opacity-50">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-md flex items-center justify-center">
-                                        <span className="text-zinc-950 text-xs font-bold">M</span>
+                                {isAuditing && !auditData && (
+                                    /* Typing Indicator */
+                                    <div className="flex gap-3">
+                                        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-md flex items-center justify-center">
+                                            <span className="text-zinc-950 text-xs font-bold">M</span>
+                                        </div>
+                                        <div className="bg-zinc-800/40 rounded-lg p-3 flex gap-1 border border-zinc-700/30">
+                                            <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"></span>
+                                            <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
+                                            <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                                        </div>
                                     </div>
-                                    <div className="bg-zinc-800/40 rounded-lg p-3 flex gap-1 border border-zinc-700/30">
-                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"></span>
-                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                                    </div>
-                                </div>
+                                )}
                             </div>
 
                             {/* Input Area */}
@@ -239,7 +305,7 @@ const KnowledgeRetentionDemo = () => {
 
                     {/* Visual C: Knowledge Graveyard Search */}
                     <div className="flex flex-col">
-                        <div className="relative bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800 shadow-2xl">
+                        <div className={`relative bg-zinc-900 rounded-lg overflow-hidden border transition-all duration-500 shadow-2xl ${auditStep === 3 ? 'border-emerald-500 ring-1 ring-emerald-500/50 scale-[1.02]' : 'border-zinc-800'}`}>
                             {/* Laptop Frame Header */}
                             <div className="bg-zinc-800/80 px-4 py-2 flex items-center gap-2 border-b border-zinc-700/50">
                                 <div className="flex gap-1.5">
@@ -247,7 +313,7 @@ const KnowledgeRetentionDemo = () => {
                                     <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
                                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
                                 </div>
-                                <span className="text-zinc-500 text-xs ml-2 font-medium tracking-wide">KNOWLEDGE GRAVEYARD</span>
+                                <span className="text-zinc-500 text-xs ml-2 font-medium tracking-wide">OMNIKNOW AGENT</span>
                             </div>
 
                             {/* Search Content */}
@@ -284,8 +350,8 @@ const KnowledgeRetentionDemo = () => {
                                         </div>
 
                                         {/* AI Synthesized Answer */}
-                                        <p className="text-zinc-400 text-xs leading-relaxed mb-3 pl-5 border-l-2 border-amber-500/20">
-                                            Based on <span className="text-white font-medium">Sarah Miller's</span> work on March 12th, you must flush Redis keys first using <span className="text-white font-mono bg-zinc-700/50 px-1 py-0.5 rounded">FLUSHALL</span>, then restart the pod. This resolves cache lockup issues.
+                                        <p className="text-zinc-400 text-xs leading-relaxed mb-3 pl-5 border-l-2 border-emerald-500/20">
+                                            {auditData ? auditData.summary : "Awaiting agent synthesis..."}
                                         </p>
 
                                         {/* Source Links */}
