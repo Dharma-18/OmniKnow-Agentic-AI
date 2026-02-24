@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backend
+__pycache__/
+*.py[cod]
+*$py.class
+auth.json
+.env
+venv/
+.venv/
+
+# Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+.gemini/
+brain/
